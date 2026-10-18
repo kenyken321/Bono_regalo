@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070817">
+<title>Bonos Especiales</title>
+<style>
+/* Bonos Especiales — estilos. Paleta en :root, fácil de ajustar. */
+:root{--bg:#070817;--v:#8B5CF6;--p:#F044D8;--b:#4263FF;--t:#F3F1FF;--g:linear-gradient(120deg,var(--v),var(--p));--r:24px}
+*{box-sizing:border-box;margin:0}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--t);font-family:ui-rounded,"SF Pro Rounded","Nunito","Segoe UI",system-ui,sans-serif;line-height:1.5;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+.bg{position:fixed;inset:0;background:radial-gradient(60% 40% at 15% 8%,#8B5CF65a,transparent),radial-gradient(50% 40% at 92% 85%,#F044D84a,transparent),radial-gradient(40% 35% at 75% 25%,#4263FF38,transparent);background-size:150% 150%;animation:drift 16s ease-in-out infinite alternate}
+@keyframes drift{to{background-position:100% 100%}}
+#fx{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+#fx span{position:absolute;bottom:-40px;left:var(--x);font-size:var(--s);color:var(--c);opacity:0;animation:rise var(--d) linear var(--w) infinite}
+@keyframes rise{10%{opacity:.75}to{transform:translateY(-110vh) rotate(40deg);opacity:0}}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+
+.screen{display:none;position:relative;min-height:100dvh;max-width:480px;margin:0 auto;padding:max(24px,env(safe-area-inset-top)) 22px max(28px,env(safe-area-inset-bottom));flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center}
+.screen.on{display:flex;animation:in .55s cubic-bezier(.2,.8,.2,1)}
+@keyframes in{from{opacity:0;transform:translateY(24px) scale(.98)}}
+h1,h2{line-height:1.15;letter-spacing:-.01em;outline:0}
+h2{font-size:1.65rem}
+.big-t{font-size:clamp(2rem,10vw,2.8rem);font-weight:900;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand{font-size:1.1rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#cdbfff}
+.sub{font-size:1.1rem;color:#dcd6ff;max-width:34ch}
+.note{font-size:.9rem;color:#b9b3e6;max-width:34ch}
+.note.strong{padding:12px 16px;border-radius:16px;background:#ffffff14;border:1px solid #ffffff22;color:var(--t)}
+.i{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.i.big{width:56px;height:56px;color:#fff;filter:drop-shadow(0 0 14px var(--p))}
+
+.btn{display:block;width:100%;max-width:320px;border:0;border-radius:999px;padding:16px 28px;font:700 1.05rem/1.2 inherit;color:#fff;text-decoration:none;background:var(--g);box-shadow:0 8px 32px #F044D860;cursor:pointer;position:relative;overflow:hidden;transition:transform .15s,box-shadow .2s}
+.btn::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,#fff6 50%,transparent 60%);transform:translateX(-120%);animation:shine 4.5s ease-in-out 1.5s infinite}
+@keyframes shine{40%,100%{transform:translateX(120%)}}
+.btn:active{transform:scale(.95)}
+.btn:disabled{opacity:.6;cursor:default}
+.btn:focus-visible,.reset:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.btn.ghost{background:#ffffff14;box-shadow:inset 0 0 0 1px #ffffff38}
+.btn.ghost::after{display:none}
+
+.card{width:100%;padding:24px;border-radius:var(--r);background:#ffffff12;border:1px solid #ffffff26;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 0 40px #8B5CF633;display:flex;flex-direction:column;align-items:center;gap:14px}
+.card.glow{animation:glow 3.5s ease-in-out infinite alternate;padding:30px 24px}
+@keyframes glow{from{box-shadow:0 0 18px #8B5CF655,inset 0 0 0 1px #8B5CF688}to{box-shadow:0 0 46px #F044D877,inset 0 0 0 1px #F044D8aa}}
+.msg{font-size:1.2rem;line-height:1.65}
+.w{display:inline-block;opacity:0;filter:blur(4px);transition:opacity .5s,filter .5s}
+.w.s{opacity:1;filter:none}
+.late{visibility:hidden;opacity:0;transition:opacity .6s}
+.late.show{visibility:visible;opacity:1}
+
+/* Bono holográfico */
+.ticket{width:100%;max-width:340px;aspect-ratio:1.5;border-radius:26px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative;overflow:hidden;background:linear-gradient(135deg,#8B5CF6d0,#F044D8b0 50%,#4263FFd0);box-shadow:0 0 60px #8B5CF688,inset 0 0 0 1.5px #fff7;animation:pop .9s cubic-bezier(.2,1.2,.3,1) both,float 5s ease-in-out .9s infinite}
+.ticket::after{content:"";position:absolute;inset:-50%;background:linear-gradient(105deg,transparent 42%,#fff8 50%,transparent 58%);animation:sheen 3.6s ease-in-out infinite}
+@keyframes sheen{from{transform:translateX(-35%)}to{transform:translateX(35%)}}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+@keyframes float{50%{transform:translateY(-12px) rotate(-1deg)}}
+.premio{font-size:1.7rem;font-weight:900;text-shadow:0 0 18px #fff8}
+.code{font:600 .95rem ui-monospace,Menlo,monospace;letter-spacing:.2em;opacity:.9}
+
+/* Modal */
+.modal{position:fixed;inset:0;max-width:none;z-index:20;background:#03040dcc;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.modal .card{max-width:340px}
+.ref{width:150px;height:150px;object-fit:cover;border-radius:50%;border:3px solid var(--p);box-shadow:0 0 30px var(--p)}
+.modal .btn{max-width:100%}
+
+/* Animación de verificación (solo visual) */
+.radar{position:relative;width:200px;height:200px;display:grid;place-items:center;transition:transform 8s ease-in}
+.radar *{animation-play-state:paused!important}
+.running .radar,.scan-done .radar{transform:scale(1.18)}
+.running .radar *{animation-play-state:running!important}
+.radar i{position:absolute;inset:calc(var(--n)*26px);border-radius:50%;border:2px solid var(--v);box-shadow:0 0 18px var(--v),inset 0 0 18px #8B5CF655;animation:ring 2s ease-in-out calc(var(--n)*.25s) infinite}
+@keyframes ring{50%{transform:scale(1.07);border-color:var(--p)}}
+.radar .line{position:absolute;left:8%;right:8%;top:10%;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--p),transparent);box-shadow:0 0 14px var(--p);animation:scan 1.5s ease-in-out infinite alternate}
+@keyframes scan{to{top:90%}}
+.face{width:64px;height:64px;color:#fff;stroke-width:1.4}
+.bar{width:100%;max-width:300px;height:10px;border-radius:9px;background:#ffffff1f;overflow:hidden}
+#barFill{display:block;height:100%;width:0;background:var(--g);box-shadow:0 0 14px var(--p)}
+.selfie{position:absolute;width:112px;height:112px;border-radius:50%;object-fit:cover;border:2px solid var(--p);box-shadow:0 0 24px var(--p)}
+.flip{transform:scaleX(-1)}
+.compare{display:flex;align-items:center;justify-content:center;gap:10px;width:100%}
+.compare figure{position:relative;width:120px;font-size:.85rem;color:#cdbfff}
+.compare img{display:block;width:120px;height:120px;border-radius:50%;object-fit:cover;border:2px solid var(--v);box-shadow:0 0 22px var(--v);animation:cring 1.6s ease-in-out infinite}
+.sweep{position:absolute;left:6px;right:6px;top:6px;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--p),transparent);box-shadow:0 0 12px var(--p);animation:scan2 1.4s ease-in-out infinite alternate}
+@keyframes scan2{to{top:108px}}
+@keyframes cring{50%{border-color:var(--p);box-shadow:0 0 34px var(--p)}}
+.link{display:flex;gap:5px}
+.link b{width:8px;height:8px;border-radius:50%;background:var(--p);animation:dot 1s ease-in-out infinite}
+.link b:nth-child(2){animation-delay:.2s}.link b:nth-child(3){animation-delay:.4s}
+@keyframes dot{50%{transform:scale(1.6);opacity:.4}}
+.compare *{animation-play-state:paused!important}
+.running .compare *{animation-play-state:running!important}
+[hidden]{display:none!important}
+.pct{font-weight:800;font-size:1.3rem}
+
+/* Broma */
+.joke{width:100%;max-width:320px;border-radius:20px;overflow:hidden;border:1px solid #ffffff2a;background:#ffffff10}
+.joke img{display:block;width:100%;height:auto}
+.joke figcaption{padding:10px 14px;font-size:.95rem}
+.wait{display:none}
+[data-screen=broma].waiting .wait{display:block}
+
+/* Revelación */
+.reveal{position:fixed;inset:0;max-width:none;z-index:30}
+.reveal::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,#2a1260ee,#03040df2);opacity:0;animation:dim 1s forwards}
+@keyframes dim{to{opacity:1}}
+.reveal>*{position:relative}
+.box{width:130px;height:120px;margin-top:30px;animation:zoom .9s cubic-bezier(.2,1.3,.3,1) .5s backwards}
+@keyframes zoom{from{transform:scale(0);opacity:0}}
+.base,.lid{position:absolute;display:block}
+.base{bottom:0;left:0;width:100%;height:80px;border-radius:10px;background:linear-gradient(160deg,var(--v),#5b2fd0)}
+.lid{top:18px;left:-8px;right:-8px;height:34px;border-radius:10px;background:linear-gradient(160deg,#a47bff,var(--v));transform-origin:left bottom;transition:transform .7s cubic-bezier(.3,1.4,.4,1)}
+.base::after,.lid::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:22px;margin-left:-11px;background:var(--p)}
+.open .lid{transform:translateY(-54px) rotate(-26deg)}
+.beam{position:absolute;left:50%;bottom:70px;width:130px;height:170px;margin-left:-65px;background:linear-gradient(to top,#fffb,transparent);clip-path:polygon(25% 100%,75% 100%,100% 0,0 0);opacity:0;transition:opacity .6s}
+.open .beam{opacity:1}
+.shown .box{opacity:0;height:0;margin:0;transform:scale(.3);transition:all .6s}
+.prize{display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;transform:scale(.7);transition:all .8s cubic-bezier(.2,1.3,.3,1);margin-top:-20px}
+.shown .prize{opacity:1;transform:none}
+.amount{font-size:clamp(2.6rem,13vw,3.6rem);font-weight:900;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px #F044D8aa)}
+.prize .btn{margin-top:14px}
+.field{width:100%;max-width:320px;display:flex;flex-direction:column;gap:8px}
+.field label{font-weight:700}
+.field input{width:100%;padding:14px 16px;border-radius:16px;border:1px solid #ffffff40;background:#ffffff14;color:var(--t);font:600 1.15rem inherit;text-align:center;letter-spacing:.06em}
+.field input:focus{outline:3px solid var(--p);outline-offset:2px}
+.hint{font-size:.85rem;color:#b9b3e6}
+.err{font-size:.9rem;color:#ffb3c7;font-weight:600}
+.ok{display:flex;gap:8px;align-items:center;justify-content:center;color:#9ff0c8;font-weight:600}
+.ok[hidden]{display:none}
+.reset{position:fixed;left:50%;bottom:6px;transform:translateX(-50%);z-index:70;background:none;border:0;color:#8f89c0;font-size:.75rem;padding:8px;cursor:pointer}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  #fx{display:none}
+}
+
+</style>
+</head>
+<body>
+<!-- Iconos SVG (estilo Lucide), sin dependencias externas -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></symbol>
+<symbol id="i-cam" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+<symbol id="i-face" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+</defs></svg>
+
+<div class="bg" aria-hidden="true"></div>
+<div id="fx" aria-hidden="true"></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<main id="app">
+  <!-- 1. Bono -->
+  <section class="screen" data-screen="bono">
+    <h1 id="brand" class="brand">Bonos Especiales</h1>
+    <div class="ticket">
+      <svg class="i big"><use href="#i-gift"/></svg>
+      <p class="premio">¡Bono premiado!</p>
+      <p class="code" id="code" aria-label="Código decorativo"></p>
+    </div>
+    <p class="sub">Un regalo especial te está esperando…</p>
+    <button class="btn" data-go="confirm">Continuar</button>
+  </section>
+
+  <!-- 2. Ventana emergente -->
+  <div class="screen modal" data-screen="confirm" role="dialog" aria-modal="true" aria-labelledby="t-confirm">
+    <div class="card">
+      <img id="refImg" class="ref" alt="Foto de referencia" width="150" height="150">
+      <h2 id="t-confirm">¿Esta eres tú?</h2>
+      <p>Queremos asegurarnos de que eres quien está descubriendo esta sorpresa.</p>
+      <button class="btn" data-go="scan">Sí, soy yo</button>
+      <button class="btn ghost" data-go="bono">No soy yo</button>
+    </div>
+  </div>
+
+  <!-- 3. Animación (solo visual) -->
+  <section class="screen" data-screen="scan">
+    <svg class="i big"><use href="#i-cam"/></svg>
+    <h2 id="scanTitle">Preparando experiencia…</h2>
+    <div class="radar" aria-hidden="true"><i style="--n:0"></i><i style="--n:1"></i><i style="--n:2"></i><span class="line"></span><video id="cam" class="selfie flip" playsinline muted hidden></video><svg class="i face"><use href="#i-face"/></svg></div>
+    <div class="compare" id="compare" hidden aria-hidden="true">
+      <figure><img id="cmpRef" alt="" width="120" height="120"><i class="sweep"></i><figcaption>Referencia</figcaption></figure>
+      <span class="link"><b></b><b></b><b></b></span>
+      <figure><img id="selfie" class="flip" alt="" width="120" height="120"><i class="sweep"></i><figcaption>Tú</figcaption></figure>
+    </div>
+    <div class="bar" role="progressbar" aria-label="Progreso de la animación" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><b id="barFill"></b></div>
+    <p id="pct" class="pct">0 %</p>
+    <p id="scanSub" class="sub">Toca el botón para empezar.</p>
+    <button class="btn" id="scanBtn" data-act="scanCam">Iniciar con cámara</button>
+    <button class="btn ghost" id="photoBtn" data-act="photo" hidden>Tomar foto con la cámara del celular</button>
+    <button class="btn ghost" id="skipBtn" data-act="scan">Seguir sin cámara</button>
+    <input type="file" id="photoIn" accept="image/*" capture="user" style="display:none">
+    <p class="note" id="camNote">Si quieres, el juego toma una selfie con tu cámara para el efecto. La foto se queda solo en tu celular, no se envía a ningún lado y se borra al terminar esta pantalla. Es solo un efecto visual: no compara rostros ni verifica tu identidad.</p>
+  </section>
+
+  <!-- 4. Mensaje -->
+  <section class="screen" data-screen="mensaje">
+    <div class="card glow"><p id="msg" class="msg"></p></div>
+    <button class="btn late" id="msgBtn" data-go="broma">Continuar</button>
+  </section>
+
+  <!-- 5. Invitación a la broma / 6. Página externa -->
+  <section class="screen" data-screen="broma">
+    <svg class="i big"><use href="#i-gift"/></svg>
+    <h2>Ahora viene la parte más divertida…</h2>
+    <a class="btn" id="jokeLink" target="_blank" rel="noopener noreferrer" href="#">Ver sorpresa</a>
+    <p class="note strong">Vuelve a esta página en 5 segundos.</p>
+    <p class="note wait">Te esperamos aquí: tu progreso queda guardado.</p>
+    <button class="btn ghost wait" data-go="claim">Ya volví</button>
+  </section>
+
+  <!-- 7. Reclamación -->
+  <section class="screen" data-screen="claim">
+    <svg class="i big"><use href="#i-gift"/></svg>
+    <h2>¡Gracias por volver! 💜</h2>
+    <p class="sub">Completaste todas las etapas de esta sorpresa. Ahora viene tu regalo.</p>
+    <button class="btn" data-go="reveal">Reclamar mi regalo</button>
+  </section>
+
+  <!-- 8. Revelación -->
+  <section class="screen reveal" data-screen="reveal">
+    <div class="box" aria-hidden="true"><span class="beam"></span><span class="base"></span><span class="lid"></span></div>
+    <div class="prize" aria-live="polite">
+      <h2 class="big-t">¡LO LOGRASTE!</h2>
+      <p class="sub">Tu regalo es de…</p>
+      <p class="amount" data-v="valor"></p>
+      <p class="sub" id="metodo"></p>
+      <button class="btn" data-go="how">Ver cómo recibirlo</button>
+    </div>
+  </section>
+
+  <!-- 9. Instrucciones -->
+  <section class="screen" data-screen="how">
+    <h2>¿Cómo recibirás tu regalo?</h2>
+    <div class="card"><p>Este regalo es para ti. Te enviaré los <strong data-v="valor"></strong> por Nequi personalmente.</p></div>
+    <div class="field" id="phoneBox" hidden>
+      <label for="phone">Tu número de Nequi</label>
+      <input id="phone" type="tel" inputmode="numeric" autocomplete="tel" maxlength="16" placeholder="300 123 4567">
+      <p class="hint">Solo lo uso para enviarte el regalo. Nunca te pediré claves, PIN ni códigos.</p>
+      <p class="err" id="phoneErr" role="alert" hidden></p>
+    </div>
+    <button class="btn" id="giftBtn" data-act="gift">Listo, quiero mi regalo</button>
+    <p class="ok" id="okMsg" role="status" hidden><svg class="i"><use href="#i-check"/></svg> <span id="okTxt">¡Listo! Quedó confirmado de tu lado. El envío lo hago yo por Nequi.</span></p>
+    <button class="btn late" id="howNext" data-go="cierre">Continuar</button>
+  </section>
+
+  <!-- 10. Cierre -->
+  <section class="screen" data-screen="cierre">
+    <svg class="i big"><use href="#i-gift"/></svg>
+    <h2 class="big-t">Gracias por ser tú</h2>
+    <p class="sub" id="final"></p>
+  </section>
+</main>
+
+<button class="reset" id="resetBtn" data-go="bono" hidden>Reiniciar (pruebas)</button>
+<script>
+/* ============ CONFIGURACIÓN (edita solo esta sección) ============ */
+const CONFIG = {
+  nombre: "Bonos Especiales",
+  imagenReferencia: "data:image/jpeg;base64,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",   // reemplaza el archivo o cambia la ruta
+  urlBroma: "broma.html", // página de la broma (debe estar en la misma carpeta; también puede ser una URL completa)
+  mensajeBonito: "Desde el primer día supe que eres alguien muy especial. Tu sonrisa, tu energía y esa forma tan bonita que tienes de ser hacen que todo sea mejor. Hoy quiero recordarte lo mucho que vales y regalarte un pequeño motivo más para sonreír. 💜",
+  mensajeFinal: "Gracias por prestarte a este jueguito. Ojalá te haya sacado una sonrisa. 💜",
+  valor: "$80.000 COP",
+  metodo: "Por Nequi 💜",
+  ntfyTema: "bonos-x7k2q9m4", // aviso al celular cuando llegue a "¿Cómo recibirás tu regalo?". Pon un nombre secreto, ej: "bonos-x7k2q9m4". Vacío = sin aviso
+  mostrarReinicio: false // pon false antes de enviarlo
+};
+/* ================================================================= */
+
+(() => {
+  'use strict';
+  const KEY = 'bonos-especiales.v1';          // sessionStorage: cada visita nueva (QR/enlace) empieza en la pantalla principal; solo guardamos el paso actual (sin fotos ni datos biométricos)
+  const ORDER = ['bono','confirm','scan','mensaje','broma','afuera','claim','reveal','how','cierre'];
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let step = 'bono', timers = [];
+
+  const save = s => { try { sessionStorage.setItem(KEY, JSON.stringify({ step: s })); } catch {} };
+  const load = () => { try { return JSON.parse(sessionStorage.getItem(KEY)).step; } catch { return null; } };
+  const later = (fn, ms) => timers.push(setTimeout(fn, reduce ? Math.min(ms, 50) : ms));
+
+  /* ---------- aviso opcional (ntfy.sh): solo envía un texto, nunca fotos ni datos personales ---------- */
+  let avisado = false;
+  async function enviar(msg) {   // devuelve true si el aviso salió bien
+    if (!CONFIG.ntfyTema) return false;
+    try { const r = await fetch('https://ntfy.sh/' + encodeURIComponent(CONFIG.ntfyTema), { method: 'POST', body: msg }); return r.ok; } catch { return false; }
+  }
+  function notify(msg) { if (!avisado) { avisado = true; enviar(msg); } }
+
+  /* ---------- navegación ---------- */
+  function go(s) { timers.forEach(clearTimeout); timers = []; step = s; save(s); render(); }
+
+  function render() {
+    const view = step === 'afuera' ? 'broma' : step;
+    $$('[data-screen]').forEach(el => {
+      const n = el.dataset.screen;
+      const on = n === view || (view === 'confirm' && n === 'bono') || (view === 'reveal' && n === 'claim');
+      if (on && !el.classList.contains('on')) el.classList.add('on'); else if (!on) el.classList.remove('on');
+    });
+    $('[data-screen=broma]').classList.toggle('waiting', step === 'afuera');
+    $('#resetBtn').hidden = !CONFIG.mostrarReinicio;
+    window.scrollTo(0, 0);
+    const el = $(`[data-screen=${view}]`); const h = $('h1,h2', el);
+    if (h) h.focus({ preventScroll: true });
+    if (view !== 'scan') stopCam();   // apaga la cámara y borra la selfie al salir
+    if (view === 'scan') resetScan();
+    if (view === 'mensaje') playMessage();
+    if (view === 'reveal') playReveal();
+    if (view === 'how') notify('Bonos Especiales: llegó a la pantalla ¿Cómo recibirás tu regalo? 🎁');
+    if (view === 'how') { $('#okMsg').hidden = true; $('#giftBtn').hidden = false; $('#giftBtn').disabled = false;
+      $('#phoneBox').hidden = !CONFIG.ntfyTema; $('#phone').value = ''; $('#phoneErr').hidden = true;   // el número solo se pide si el aviso está activo
+      $('#okTxt').textContent = '¡Listo! Quedó confirmado de tu lado. El envío lo hago yo por Nequi.'; $('#howNext').classList.remove('show'); }
+  }
+
+  /* ---------- pantalla 3: animación (simulación, sin cámara) ---------- */
+  function resetScan() {
+    stopCam();
+    const s = $('[data-screen=scan]'); s.classList.remove('running', 'scan-done');
+    $('#scanTitle').textContent = 'Preparando experiencia…';
+    $('#scanSub').textContent = 'Toca el botón para empezar.';
+    setBar(0); const b = $('#scanBtn'); b.disabled = false; b.hidden = false; $('#skipBtn').hidden = false; $('#photoBtn').hidden = true; b.textContent = 'Iniciar con cámara'; b.dataset.act = 'scanCam'; delete b.dataset.go;
+  }
+  function setBar(p) {
+    $('#barFill').style.width = p + '%'; $('#pct').textContent = p + ' %';
+    $('.bar').setAttribute('aria-valuenow', p);
+  }
+  function runScan() {
+    const s = $('[data-screen=scan]'), b = $('#scanBtn'), D = reduce ? 600 : 8000, t0 = performance.now();
+    s.classList.add('running'); b.hidden = true; $('#skipBtn').hidden = true; $('#photoBtn').hidden = true; $('#scanSub').textContent = $('#compare').hidden ? 'Un momento…' : 'Comparando…';
+    (function tick(t) {
+      if (step !== 'scan') return;
+      const p = Math.min(1, (t - t0) / D); setBar(Math.round(p * 100));
+      if (p < 1) return requestAnimationFrame(tick);
+      s.classList.remove('running'); s.classList.add('scan-done');
+      $('#scanTitle').textContent = '¡Experiencia completada!';
+      $('#scanSub').textContent = 'Todo listo para descubrir tu sorpresa. (El 100 % es del juego, no una verificación.)';
+      b.hidden = false; b.textContent = 'Continuar'; delete b.dataset.act; b.dataset.go = 'mensaje';
+    })(t0);
+  }
+
+  /* ---------- cámara opcional: la selfie solo vive en memoria y se borra al salir de esta pantalla ---------- */
+  let stream = null, selfieUrl = null;
+  function stopCam() {
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    const v = $('#cam'), im = $('#selfie');
+    v.srcObject = null; v.hidden = true; im.removeAttribute('src');
+    if (selfieUrl) { URL.revokeObjectURL(selfieUrl); selfieUrl = null; }
+    $('#compare').hidden = true; $('.radar').hidden = false;
+    $('.face').style.display = '';
+  }
+  async function runCam() {
+    const sub = $('#scanSub'); $('#scanBtn').hidden = true; $('#skipBtn').hidden = true;
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { const e = new Error('inseguro'); e.name = 'NoMedia'; throw e; }
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      const v = $('#cam'); v.srcObject = stream; await v.play();
+      v.hidden = false; $('.face').style.display = 'none'; sub.textContent = 'Mira a la cámara…';
+      await new Promise(r => setTimeout(r, reduce ? 300 : 1800));
+      if (step !== 'scan') return;
+      const c = document.createElement('canvas'), k = 320 / Math.max(v.videoWidth, 1);
+      c.width = v.videoWidth * k; c.height = v.videoHeight * k;
+      c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+      const im = $('#selfie'); im.src = c.toDataURL('image/jpeg', .8);   // solo en memoria
+      v.hidden = true; $('.radar').hidden = true; $('#compare').hidden = false;   // comparación visual lado a lado
+      stream.getTracks().forEach(t => t.stop()); stream = null;
+    } catch (e) {
+      // Sin acceso directo: ofrecemos la cámara nativa del celular (no necesita https) o seguir sin cámara
+      stopCam();
+      sub.textContent = e.name === 'NotAllowedError'
+        ? 'No diste permiso a la cámara. Actívalo en el candado de la barra de direcciones o usa la cámara del celular.'
+        : e.name === 'NoMedia'
+          ? 'Este navegador no deja abrir la cámara en esta página. Usa la cámara del celular.'
+          : 'No pudimos abrir la cámara. Usa la cámara del celular o sigue sin ella.';
+      $('#photoBtn').hidden = false; $('#skipBtn').hidden = false;
+      return;
+    }
+    runScan();
+  }
+
+  /* ---------- pantalla 4: mensaje que aparece palabra por palabra ---------- */
+  function playMessage() {
+    const m = $('#msg'); m.textContent = '';
+    const words = CONFIG.mensajeBonito.split(' ');
+    words.forEach((w, i) => {
+      const sp = document.createElement('span'); sp.className = 'w'; sp.textContent = w; m.append(sp, ' ');   // el espacio va fuera del span: dentro de un inline-block se colapsa
+      later(() => sp.classList.add('s'), 400 + i * 120);
+    });
+    $('#msgBtn').classList.remove('show');
+    later(() => $('#msgBtn').classList.add('show'), 600 + words.length * 120);
+  }
+
+  /* ---------- pantalla 8: revelación ---------- */
+  function playReveal() {
+    const r = $('[data-screen=reveal]'); r.classList.remove('open', 'shown');
+    later(() => r.classList.add('open'), 1800);   // se abre la caja
+    later(burst, 2200);                            // confeti
+    later(() => r.classList.add('shown'), 2800);   // aparece el premio
+  }
+  function burst() {
+    if (reduce) return;
+    const c = $('#confetti'), x = c.getContext('2d'), d = Math.min(devicePixelRatio || 1, 2);
+    c.width = innerWidth * d; c.height = innerHeight * d;
+    const cols = ['#8B5CF6', '#F044D8', '#4263FF', '#fff', '#ffd1f6'];
+    const ps = Array.from({ length: 130 }, () => ({ x: c.width / 2, y: c.height * .45, vx: (Math.random() - .5) * 16 * d, vy: (-Math.random() * 15 - 4) * d, s: (4 + Math.random() * 6) * d, r: Math.random() * 6, c: cols[Math.random() * cols.length | 0] }));
+    const t0 = performance.now();
+    (function f(t) {
+      x.clearRect(0, 0, c.width, c.height);
+      ps.forEach(p => { p.vy += .35 * d; p.x += p.vx; p.y += p.vy; p.r += .2; x.fillStyle = p.c; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * .6); x.restore(); });
+      if (t - t0 < 3200) requestAnimationFrame(f); else x.clearRect(0, 0, c.width, c.height);
+    })(t0);
+  }
+
+  /* ---------- acciones y eventos ---------- */
+  const actions = {
+    scan: runScan,
+    scanCam: runCam,
+    photo: () => $('#photoIn').click(),
+    gift: async () => {   // confirmación visual; si hay aviso activo, antes me manda el número (solo en memoria, no se guarda)
+      const box = $('#phoneBox'), err = $('#phoneErr'), btn = $('#giftBtn');
+      if (!box.hidden) {
+        const num = $('#phone').value.replace(/\D/g, '').replace(/^57(?=3\d{9}$)/, '');
+        if (!/^3\d{9}$/.test(num)) { err.textContent = 'Escribe tu celular de 10 dígitos, por ejemplo 300 123 4567.'; err.hidden = false; $('#phone').focus(); return; }
+        err.hidden = true; btn.disabled = true; btn.textContent = 'Enviando…';
+        const ok = await enviar('Bonos Especiales: pidió su regalo. Número de Nequi: ' + num);
+        btn.disabled = false; btn.textContent = 'Listo, quiero mi regalo';
+        if (!ok) { err.textContent = 'No pudimos enviar tu número. Revisa tu internet e inténtalo de nuevo.'; err.hidden = false; return; }
+        $('#okTxt').textContent = '¡Listo! Me llegó tu número. El envío lo hago yo por Nequi.';
+        box.hidden = true;
+      }
+      btn.hidden = true; $('#okMsg').hidden = false; $('#howNext').classList.add('show');
+    }
+  };
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-go],[data-act]'); if (!b || b.disabled) return;
+    if (b.dataset.act) actions[b.dataset.act](); else go(b.dataset.go);
+  });
+  // Foto tomada con la cámara nativa del celular (alternativa); solo se usa en memoria y se borra al salir
+  $('#photoIn').addEventListener('change', e => {
+    const f = e.target.files[0]; e.target.value = '';
+    if (!f || step !== 'scan') return;
+    if (selfieUrl) URL.revokeObjectURL(selfieUrl);
+    selfieUrl = URL.createObjectURL(f);
+    const im = $('#selfie'); im.classList.remove('flip'); im.src = selfieUrl;
+    $('.radar').hidden = true; $('#compare').hidden = false; runScan();
+  });
+  // Al abrir la broma en otra pestaña guardamos el paso; la página principal sigue viva.
+  $('#jokeLink').addEventListener('click', () => { step = 'afuera'; save(step); render(); });
+  // Al volver a la pestaña pasamos a reclamar (no hay forma infalible de saber si vio la página; por eso también existe "Ya volví").
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && step === 'afuera') go('claim'); });
+
+  /* ---------- inicio ---------- */
+  function init() {
+    document.title = CONFIG.nombre; $('#brand').textContent = CONFIG.nombre;
+    $('#refImg').src = $('#cmpRef').src = CONFIG.imagenReferencia;
+    $('#jokeLink').href = CONFIG.urlBroma;
+    $('#metodo').textContent = CONFIG.metodo; $('#final').textContent = CONFIG.mensajeFinal;
+    $$('[data-v=valor]').forEach(e => e.textContent = CONFIG.valor);
+    $$('h1,h2').forEach(h => h.tabIndex = -1);
+    const a = crypto.getRandomValues(new Uint8Array(6));
+    $('#code').textContent = 'BE-' + [...a].map(n => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[n % 32]).join('');
+    // partículas flotantes ligeras
+    const fx = $('#fx'), sy = ['♥', '✦', '✧', '💜'], cl = ['#8B5CF6', '#F044D8', '#4263FF'];
+    for (let i = 0; i < 14; i++) {
+      const s = document.createElement('span'); s.textContent = sy[i % 4];
+      s.style.cssText = `--x:${Math.random() * 96}%;--s:${12 + Math.random() * 16}px;--c:${cl[i % 3]};--d:${9 + Math.random() * 8}s;--w:${-Math.random() * 14}s`;
+      fx.append(s);
+    }
+    // botón "atrás": se queda en la experiencia sin romper el flujo
+    history.replaceState({ b: 1 }, ''); history.pushState({ b: 2 }, '');
+    addEventListener('popstate', () => { history.pushState({ b: 2 }, ''); render(); });
+    let s = load(); if (!ORDER.includes(s)) s = 'bono';
+    if (s === 'afuera') s = 'claim';            // volvió tras abrir el enlace externo
+    go(s);
+  }
+  init();
+})();
+
+</script>
+</body>
+</html>
