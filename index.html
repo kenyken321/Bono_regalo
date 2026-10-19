@@ -91,6 +91,13 @@ h2{font-size:1.65rem}
 .compare *{animation-play-state:paused!important}
 .running .compare *{animation-play-state:running!important}
 [hidden]{display:none!important}
+.preview .radar{width:250px;height:250px}
+/* Vista previa de la cámara siempre circular (el contenedor recorta el video; el filtro mask arregla Safari/Android) */
+.vwrap{position:absolute;width:112px;height:112px;border-radius:50%;overflow:hidden;border:3px solid var(--p);-webkit-mask-image:-webkit-radial-gradient(white,black);transform:translateZ(0)}
+.vwrap video{display:block;width:100%;height:100%;object-fit:cover}
+.preview .vwrap{width:210px;height:210px}
+.preview .radar *{animation-play-state:running!important}
+.cnt{position:absolute;z-index:3;font-size:5rem;font-weight:900;color:#fff;text-shadow:0 0 24px #000,0 0 30px var(--p)}
 .pct{font-weight:800;font-size:1.3rem}
 
 /* Broma */
@@ -177,7 +184,7 @@ h2{font-size:1.65rem}
   <section class="screen" data-screen="scan">
     <svg class="i big"><use href="#i-cam"/></svg>
     <h2 id="scanTitle">Preparando experiencia…</h2>
-    <div class="radar" aria-hidden="true"><i style="--n:0"></i><i style="--n:1"></i><i style="--n:2"></i><span class="line"></span><video id="cam" class="selfie flip" playsinline muted hidden></video><svg class="i face"><use href="#i-face"/></svg></div>
+    <div class="radar" aria-hidden="true"><i style="--n:0"></i><i style="--n:1"></i><i style="--n:2"></i><span class="line"></span><span class="cnt" id="cnt" hidden></span><span class="vwrap" id="vwrap" hidden><video id="cam" class="flip" playsinline muted></video></span><svg class="i face"><use href="#i-face"/></svg></div>
     <div class="compare" id="compare" hidden aria-hidden="true">
       <figure><img id="cmpRef" alt="" width="120" height="120"><i class="sweep"></i><figcaption>Referencia</figcaption></figure>
       <span class="link"><b></b><b></b><b></b></span>
@@ -188,9 +195,8 @@ h2{font-size:1.65rem}
     <p id="scanSub" class="sub">Toca el botón para empezar.</p>
     <button class="btn" id="scanBtn" data-act="scanCam">Iniciar con cámara</button>
     <button class="btn ghost" id="photoBtn" data-act="photo" hidden>Tomar foto con la cámara del celular</button>
-    <button class="btn ghost" id="skipBtn" data-act="scan">Seguir sin cámara</button>
     <input type="file" id="photoIn" accept="image/*" capture="user" style="display:none">
-    <p class="note" id="camNote">Si quieres, el juego toma una selfie con tu cámara para el efecto. La foto se queda solo en tu celular, no se envía a ningún lado y se borra al terminar esta pantalla. Es solo un efecto visual: no compara rostros ni verifica tu identidad.</p>
+    <p class="note" id="camNote">El juego toma una selfie con tu cámara para el efecto. La foto se queda solo en tu celular, no se envía a ningún lado y se borra al terminar esta pantalla. Es solo un efecto visual: no compara rostros ni verifica tu identidad.</p>
   </section>
 
   <!-- 4. Mensaje -->
@@ -320,7 +326,7 @@ const CONFIG = {
     const s = $('[data-screen=scan]'); s.classList.remove('running', 'scan-done');
     $('#scanTitle').textContent = 'Preparando experiencia…';
     $('#scanSub').textContent = 'Toca el botón para empezar.';
-    setBar(0); const b = $('#scanBtn'); b.disabled = false; b.hidden = false; $('#skipBtn').hidden = false; $('#photoBtn').hidden = true; b.textContent = 'Iniciar con cámara'; b.dataset.act = 'scanCam'; delete b.dataset.go;
+    setBar(0); const b = $('#scanBtn'); b.disabled = false; b.hidden = false; $('#photoBtn').hidden = true; b.textContent = 'Iniciar con cámara'; b.dataset.act = 'scanCam'; delete b.dataset.go;
   }
   function setBar(p) {
     $('#barFill').style.width = p + '%'; $('#pct').textContent = p + ' %';
@@ -328,7 +334,7 @@ const CONFIG = {
   }
   function runScan() {
     const s = $('[data-screen=scan]'), b = $('#scanBtn'), D = reduce ? 600 : 8000, t0 = performance.now();
-    s.classList.add('running'); b.hidden = true; $('#skipBtn').hidden = true; $('#photoBtn').hidden = true; $('#scanSub').textContent = $('#compare').hidden ? 'Un momento…' : 'Comparando…';
+    s.classList.add('running'); b.hidden = true; $('#photoBtn').hidden = true; $('#scanSub').textContent = $('#compare').hidden ? 'Un momento…' : 'Comparando…';
     (function tick(t) {
       if (step !== 'scan') return;
       const p = Math.min(1, (t - t0) / D); setBar(Math.round(p * 100));
@@ -345,37 +351,46 @@ const CONFIG = {
   function stopCam() {
     if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
     const v = $('#cam'), im = $('#selfie');
-    v.srcObject = null; v.hidden = true; im.removeAttribute('src');
+    v.srcObject = null; v.hidden = $('#vwrap').hidden = true; im.removeAttribute('src');
+    $('[data-screen=scan]').classList.remove('preview'); $('#cnt').hidden = true;
     if (selfieUrl) { URL.revokeObjectURL(selfieUrl); selfieUrl = null; }
     $('#compare').hidden = true; $('.radar').hidden = false;
     $('.face').style.display = '';
   }
   async function runCam() {
-    const sub = $('#scanSub'); $('#scanBtn').hidden = true; $('#skipBtn').hidden = true;
+    const sub = $('#scanSub'), b = $('#scanBtn'), scr = $('[data-screen=scan]');
+    b.hidden = true; $('#photoBtn').hidden = true;
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { const e = new Error('inseguro'); e.name = 'NoMedia'; throw e; }
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
       const v = $('#cam'); v.srcObject = stream; await v.play();
-      v.hidden = false; $('.face').style.display = 'none'; sub.textContent = 'Mira a la cámara…';
-      await new Promise(r => setTimeout(r, reduce ? 300 : 1800));
-      if (step !== 'scan') return;
-      const c = document.createElement('canvas'), k = 320 / Math.max(v.videoWidth, 1);
-      c.width = v.videoWidth * k; c.height = v.videoHeight * k;
-      c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
-      const im = $('#selfie'); im.src = c.toDataURL('image/jpeg', .8);   // solo en memoria
-      v.hidden = true; $('.radar').hidden = true; $('#compare').hidden = false;   // comparación visual lado a lado
-      stream.getTracks().forEach(t => t.stop()); stream = null;
+      // Vista previa grande: ella se encuadra y toma la foto cuando esté lista
+      v.hidden = $('#vwrap').hidden = false; $('.face').style.display = 'none'; scr.classList.add('preview');
+      sub.textContent = 'Centra tu cara en el círculo y toca “Tomar foto”.';
+      b.textContent = 'Tomar foto'; b.dataset.act = 'shot'; b.hidden = false;
     } catch (e) {
-      // Sin acceso directo: ofrecemos la cámara nativa del celular (no necesita https) o seguir sin cámara
       stopCam();
       sub.textContent = e.name === 'NotAllowedError'
         ? 'No diste permiso a la cámara. Actívalo en el candado de la barra de direcciones o usa la cámara del celular.'
         : e.name === 'NoMedia'
           ? 'Este navegador no deja abrir la cámara en esta página. Usa la cámara del celular.'
-          : 'No pudimos abrir la cámara. Usa la cámara del celular o sigue sin ella.';
-      $('#photoBtn').hidden = false; $('#skipBtn').hidden = false;
-      return;
+          : 'No pudimos abrir la cámara. Inténtalo de nuevo o usa la cámara del celular.';
+      b.textContent = 'Iniciar con cámara'; b.dataset.act = 'scanCam'; b.hidden = e.name === 'NoMedia';
+      $('#photoBtn').hidden = false;
     }
+  }
+  async function shot() {   // cuenta regresiva 3-2-1 para que se acomode, luego toma la foto
+    const sub = $('#scanSub'), b = $('#scanBtn'), v = $('#cam'), cnt = $('#cnt');
+    b.hidden = true; cnt.hidden = false; sub.textContent = '¡Quieta y sonríe! 😊';
+    for (let n = 3; n > 0; n--) { cnt.textContent = n; await new Promise(r => setTimeout(r, reduce ? 150 : 900)); if (step !== 'scan' || !stream) return; }
+    cnt.hidden = true;
+    const s = Math.min(v.videoWidth, v.videoHeight), c = document.createElement('canvas');
+    c.width = c.height = Math.min(s, 480);
+    c.getContext('2d').drawImage(v, (v.videoWidth - s) / 2, (v.videoHeight - s) / 2, s, s, 0, 0, c.width, c.height);
+    const im = $('#selfie'); im.classList.add('flip'); im.src = c.toDataURL('image/jpeg', .85);   // solo en memoria
+    v.hidden = $('#vwrap').hidden = true; $('.radar').hidden = true; $('#compare').hidden = false;
+    $('[data-screen=scan]').classList.remove('preview');
+    stream.getTracks().forEach(t => t.stop()); stream = null;
     runScan();
   }
 
@@ -416,6 +431,7 @@ const CONFIG = {
   const actions = {
     scan: runScan,
     scanCam: runCam,
+    shot,
     photo: () => $('#photoIn').click(),
     gift: async () => {   // confirmación visual; si hay aviso activo, antes me manda el número (solo en memoria, no se guarda)
       const box = $('#phoneBox'), err = $('#phoneErr'), btn = $('#giftBtn');
